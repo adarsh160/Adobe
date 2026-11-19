@@ -1,0 +1,250 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IDocs Mobile Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Concept: a neutral review stage. Screen list on the left, the 390 px device in the middle, how-to on the right. */
+:root{
+  --bg:#e8eaee; --panel:#f6f7f9; --line:#d3d7de; --fg:#1d2330; --muted:#5b6475;
+  --accent:#2f56ee; --accent-soft:rgba(47,86,238,.14); --device-edge:#1b1f29; --shadow:rgba(20,28,48,.28);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13161c; --panel:#1b1f27; --line:#2d3340; --fg:#e8ebf2; --muted:#9aa3b5; --accent:#7f9bff; --accent-soft:rgba(127,155,255,.2); --device-edge:#05070a; --shadow:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13161c; --panel:#1b1f27; --line:#2d3340; --fg:#e8ebf2; --muted:#9aa3b5; --accent:#7f9bff; --accent-soft:rgba(127,155,255,.2); --device-edge:#05070a; --shadow:rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;min-height:0}
+.bar{display:flex;align-items:center;gap:12px;padding-block:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;min-width:0;margin-right:auto}
+.brand b{font-weight:600;font-size:15px}
+.brand span{color:var(--muted);font-size:12px}
+.btn{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.hs:focus-visible,.rail button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
+.btn:disabled{opacity:.45;cursor:default}
+select{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-height:36px;max-width:100%;display:none}
+.shell{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr) 250px;gap:20px}
+.rail,.help{overflow:auto;padding-block:16px;min-height:0}
+.rail h2,.help h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px;font-weight:600}
+.rail h2:first-child,.help h2:first-child{margin-top:0}
+.rail button{display:flex;gap:8px;width:100%;text-align:left;font:inherit;color:var(--fg);background:none;border:0;border-radius:6px;padding:6px 8px;cursor:pointer;min-height:32px;align-items:baseline}
+.rail button:hover{background:var(--panel)}
+.rail button[aria-current="true"]{background:var(--accent-soft);font-weight:500}
+.rail code{font:500 11px var(--font);color:var(--muted);min-width:28px}
+.help p,.help li{color:var(--muted);font-size:13px;margin:0 0 8px}
+.help ul{padding-left:18px;margin:0}
+.help kbd{font:500 11px var(--font);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel);color:var(--fg)}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0;padding-block:14px;gap:12px}
+.device{position:relative;border-radius:34px;overflow:hidden;box-shadow:0 0 0 10px var(--device-edge),0 28px 60px var(--shadow);flex:none;background:#fff}
+.viewport{position:absolute;left:0;top:0;width:390px;transform-origin:0 0;overflow:hidden;background:#fff}
+.layer{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:#fff;scrollbar-width:none}
+.layer::-webkit-scrollbar{display:none}
+.page{position:relative;width:390px}
+.page img{display:block;width:390px;height:auto;user-select:none;-webkit-user-drag:none}
+.hs{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;border-radius:6px;-webkit-tap-highlight-color:transparent}
+.show-hs .hs{background:rgba(47,86,238,.16);outline:1.5px solid rgba(47,86,238,.85);outline-offset:-1px}
+.flash .hs{animation:flash .75s ease-out}
+@keyframes flash{0%,60%{background:rgba(47,86,238,.22);outline:2px solid rgba(47,86,238,.95);outline-offset:-1px}100%{background:transparent;outline:2px solid transparent}}
+.show-hs.flash .hs{animation:none}
+.caption{display:flex;gap:8px;align-items:baseline;color:var(--muted);font-size:13px;max-width:100%;text-align:center;flex-wrap:wrap;justify-content:center}
+.caption b{color:var(--fg);font-weight:600}
+@media (max-width:1080px){.shell{grid-template-columns:200px minmax(0,1fr)}.help{display:none}}
+@media (max-width:760px){
+  body{padding-left:0;padding-right:0}
+  .bar{padding-inline:max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-right,0px))}
+  .shell{display:block}.rail{display:none}
+  select{display:block;flex:1 1 100%}
+  .stage{padding:0;gap:0;justify-content:flex-start}
+  .device{border-radius:0;box-shadow:none}
+  .caption{display:none}
+}
+@media (prefers-reduced-motion:reduce){.flash .hs{animation:none}}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand"><b>IDocs Mobile</b><span id="meta">Clickable prototype · 34 screens · 390 px</span></div>
+    <select id="jump" aria-label="Jump to screen"></select>
+    <button class="btn" id="back" type="button">‹ Back</button>
+    <button class="btn" id="restart" type="button">Restart</button>
+    <button class="btn" id="hsbtn" type="button" aria-pressed="false">Show tap areas</button>
+  </header>
+  <div class="shell">
+    <nav class="rail" id="rail" aria-label="Screens"></nav>
+    <main class="stage">
+      <div class="device" id="device"><div class="viewport" id="viewport"></div></div>
+      <div class="caption" id="caption"></div>
+    </main>
+    <aside class="help">
+      <h2>How to review</h2>
+      <ul>
+        <li>Click or tap the UI as you would on a phone. Menus, sheets, search and the page links all work.</li><li>The “3 min read” row opens the page info sheet. The side-panel icon at the right of the docs bar opens the IDocs navigation.</li>
+        <li>Tap anywhere else to flash every clickable area. <kbd>H</kbd> keeps them on.</li>
+        <li>Hover an area to see where it goes.</li>
+        <li>Long pages scroll inside the phone.</li>
+      </ul>
+      <h2>Shortcuts</h2>
+      <ul>
+        <li><kbd>Esc</kbd> or <kbd>←</kbd> back</li>
+        <li><kbd>R</kbd> restart</li>
+        <li><kbd>H</kbd> tap areas</li>
+      </ul>
+      <h2>Good paths to try</h2>
+      <ul>
+        <li>Menu ☰ → Docs → IDocs</li>
+        <li>Docs bar → Practices → Well Architected Framework → WAF Overview</li>
+        <li>Search → “waf” → See all → open a result</li>
+        <li>WAF page → “On this page” row</li>
+        <li>Collection from the landing page</li>
+      </ul>
+      <h2>Note</h2>
+      <p>Screens are exported from the Figma file. Behaviour mirrors its prototype links; real search and AI results are not live.</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+// hotspot: [x, y, w, h, destination, transition, autoAdvanceMs]
+// transitions: d dissolve · T slide up (sheet) · L from left (drawer) · P push forward · B push back
+const X=(a)=>a, BK='BACK';
+const closeNav=[342,6,44,44,BK,'d'];
+const hdr=[[4,6,44,44,'A3','L'],[252,6,44,44,'D1','d']];
+const sheet=(cy)=>[[0,0,390,844,BK,'d'],[342,cy,44,44,BK,'d']];
+const S={
+A1:{n:'Landing · reader',t:'Landing — About IDocs (reader)',h:1679,s:[...hdr,[16,72,358,20,'B1','T'],[68,160,44,44,'A4','T'],[242,160,132,44,'C8','d'],[16,372,358,52,'A4','T'],[16,440,358,48,'A5','T'],[16,616,358,98,'A2','d'],[32,858,123,40,'B1','T'],[163,858,134,40,'B6','T'],[128,1010,160,40,'A5','T'],[32,1162,131,40,'C8','d'],[32,1314,119,40,'E1','P'],[16,1488,358,72,'C1','P']]},
+A2:{n:'Landing · writer',t:'Landing — About IDocs (writer selected)',h:1425,s:[...hdr,[16,72,358,20,'B1','T'],[68,160,44,44,'A4','T'],[242,160,132,44,'C8','d'],[16,372,358,52,'A4','T'],[16,440,358,48,'A6','T'],[16,504,358,98,'A1','d'],[16,1234,358,72,'C1','P']]},
+A3:{n:'Global menu',t:'Global menu — hamburger drawer',h:898,s:[closeNav,[50,377,324,44,'A1','d']]},
+A4:{n:'Page info (landing)',t:'Page info — bottom sheet (About IDocs)',h:844,s:[...sheet(344),[16,392,175,44,'E1','P']]},
+A5:{n:'On this page · reader',t:'On this page — bottom sheet (reader)',h:844,s:[...sheet(374),...[454,504,554,604,654,704].map(y=>[16,y,358,48,'A1','d']),[16,764,358,48,BK,'d']]},
+A6:{n:'On this page · writer',t:'On this page — bottom sheet (writer)',h:844,s:[...sheet(474),...[554,604,654,704].map(y=>[16,y,358,48,'A2','d']),[16,764,358,48,BK,'d']]},
+B1:{n:'Level 0 · root',t:'Docs navigation — root',h:788,s:[closeNav,[16,56,358,44,'B6','d'],[8,108,146,44,'B4','P'],[16,161,358,48,'A1','d'],[16,211,358,48,'B2','P'],[16,261,358,48,'B5','P']]},
+B2:{n:'Level 1 · Technology and Platforms',t:'Docs navigation — Technology and Platforms',h:788,s:[closeNav,[4,157,44,44,'B1','B'],[16,287,358,48,'B3','P']]},
+B3:{n:'Level 2 · Adobe Unified Platform',t:'Docs navigation — Adobe Unified Platform',h:788,s:[closeNav,[4,157,44,44,'B2','B'],[16,287,358,48,'B4','P']]},
+B4:{n:'Level 5 · MCS',t:'Docs navigation — MCS (current page: Overview)',h:848,s:[closeNav,[274,108,108,44,'B1','B'],[4,157,44,44,'B3','B'],[16,234,358,48,'C1','d']]},
+B5:{n:'Level 3 · Well Architected Framework',t:'Docs navigation — Well Architected Framework',h:788,s:[closeNav,[274,108,108,44,'B1','B'],[4,157,44,44,'B1','B'],[16,252,358,48,'C4','d']]},
+B6:{n:'Filter · results',t:'Docs navigation — filter results',h:844,s:[closeNav,[16,56,358,44,'B7','d'],[16,256,358,62,'C1','d']]},
+B7:{n:'Filter · no matches',t:'Docs navigation — filter, no matches',h:844,s:[closeNav,[48,336,113,44,'B1','d'],[173,336,169,44,'D1','d']]},
+B8:{n:'Loading tree',t:'Docs navigation — loading',h:495,s:[[0,0,390,495,'B1','d',1200],closeNav]},
+C1:{n:'Overview · MCS',t:'Overview page — MCS',h:1177,s:[...hdr,[16,72,358,20,'B4','T'],[16,216,44,44,'C3','d'],[68,216,44,44,'C2','T'],[16,274,358,52,'C2','T'],[16,990,173,68,'A1','B']]},
+C2:{n:'Page info (Overview)',t:'Page info — bottom sheet (Overview)',h:844,s:[...sheet(344),[16,392,175,44,'E1','P']]},
+C3:{n:'Saved · toast',t:'Overview — saved to Collection',h:844,s:[[0,0,390,844,'C1','d',4000],[16,274,358,52,'C2','T'],[16,768,358,52,'E1','P']]},
+C4:{n:'WAF · Document',t:'WAF page — Document tab',h:4219,s:[...hdr,[16,72,358,20,'B5','T'],[242,258,132,44,'C8','d'],[16,316,358,52,'C10','T'],[16,382,358,48,'C5','T'],[195,446,179,48,'C7','d']]},
+C5:{n:'On this page (WAF)',t:'On this page — bottom sheet (WAF)',h:844,s:[...sheet(274),[16,504,358,48,'C9','d'],[16,764,358,48,'C4','d']]},
+C6:{n:'WAF · AI Insights loaded',t:'WAF page — AI Insights, loaded',h:1435,s:[...hdr,[16,72,358,20,'B5','T'],[16,316,358,52,'C10','T'],[16,384,179,48,'C4','d']]},
+C7:{n:'WAF · AI Insights loading',t:'WAF page — AI Insights, loading',h:1077,s:[[0,0,390,1077,'C6','d',1500],...hdr,[16,316,358,52,'C10','T']]},
+C8:{n:'WAF · Focus mode',t:'WAF page — Focus mode',h:941,s:[[8,6,145,40,'C4','d'],[259,6,127,40,'C5','T']]},
+C9:{n:'WAF · Scrolled',t:'WAF page — scrolled, sticky bar',h:844,s:[[16,16,358,20,'B5','T'],[16,63,358,48,'C5','T'],[326,772,48,48,'C4','d']]},
+C10:{n:'Page info (WAF)',t:'Page info — bottom sheet (WAF)',h:844,s:[...sheet(344),[16,392,175,44,'E1','T']]},
+D1:{n:'Search · opened',t:'Search — overlay opened',h:760,s:[[16,8,297,44,'D2','d'],[317,8,69,44,BK,'d'],[0,347,390,62,'A1','d'],[0,409,390,62,'C4','d'],[0,471,390,62,'C1','d']]},
+D2:{n:'Search · typing “waf”',t:'Search — typing “waf”',h:752,s:[[263,8,44,44,'D1','d'],[317,8,69,44,BK,'d'],[0,117,390,52,'D3','d'],[0,309,390,62,'C4','d'],[0,563,390,76,'D3','d']]},
+D3:{n:'Search · results',t:'Search — results for “waf”',h:950,s:[[317,8,69,44,BK,'d'],[16,125,121,40,'D4','T'],[16,218,358,164,'C4','d'],[16,394,358,164,'C4','d']]},
+D4:{n:'Search · filters sheet',t:'Search — filters bottom sheet',h:844,s:[...sheet(237),[16,772,175,44,'D3','d'],[203,772,172,44,'D3','d']]},
+D5:{n:'Search · no results',t:'Search — no results',h:844,s:[[263,8,44,44,'D1','d'],[317,8,69,44,BK,'d']]},
+D6:{n:'Search · error',t:'Search — error',h:844,s:[[317,8,69,44,BK,'d'],[129,345,133,44,'D7','d']]},
+D7:{n:'Search · loading',t:'Search — loading results',h:844,s:[[0,0,390,844,'D3','d',1500],[317,8,69,44,BK,'d']]},
+E1:{n:'Collection',t:'Collection — saved pages',h:844,s:[...hdr,[4,64,44,44,BK,'d'],[16,205,358,82,'C1','d'],[16,299,358,98,'C4','d'],[16,409,358,82,'A1','d']]},
+E2:{n:'Collection · empty',t:'Collection — empty',h:844,s:[...hdr,[4,64,44,44,BK,'d'],[115,389,160,44,'B1','T']]},
+E3:{n:'Interaction states',t:'Interaction states reference',h:960,s:[]}
+};
+const GROUPS=[['Landing and menus',['A1','A2','A3','A4','A5','A6']],['Docs navigation',['B1','B2','B3','B5','B4','B6','B7','B8']],['Pages and page tools',['C1','C2','C3','C4','C5','C6','C7','C8','C9','C10']],['Search',['D1','D2','D3','D4','D5','D6','D7']],['Collection and states',['E1','E2','E3']]];
+const PARENT={A4:'A1',A5:'A1',A6:'A2',C2:'C1',C3:'C1',C5:'C4',C10:'C4',C6:'C4',C7:'C4',C8:'C4',C9:'C4',D4:'D3'};
+
+const $=id=>document.getElementById(id);
+const device=$('device'), vp=$('viewport'), cap=$('caption');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cur={code:'A1',tr:'d'}, hist=[], busy=false, timer=null, showHs=false, scale=1, H=844;
+try{showHs=localStorage.getItem('idocs-hs')==='1'}catch(e){}
+
+function buildRail(){
+  const rail=$('rail'), sel=$('jump');
+  for(const [g,codes] of GROUPS){
+    const h=document.createElement('h2'); h.textContent=g; rail.appendChild(h);
+    const og=document.createElement('optgroup'); og.label=g; sel.appendChild(og);
+    for(const c of codes){
+      const b=document.createElement('button'); b.type='button'; b.dataset.code=c; b.innerHTML='<code>'+c+'</code><span></span>'; b.lastChild.textContent=S[c].n; b.onclick=()=>jump(c); rail.appendChild(b);
+      const o=document.createElement('option'); o.value=c; o.textContent=c+' · '+S[c].n; og.appendChild(o);
+    }
+  }
+  sel.onchange=()=>jump(sel.value);
+}
+function layout(){
+  const narrow=innerWidth<=760, bar=document.querySelector('.bar').offsetHeight;
+  const st=document.querySelector('.stage'); const sw=narrow?innerWidth:st.clientWidth-56;
+  if(narrow){ scale=sw/390; H=Math.round((innerHeight-bar)/scale); }
+  else{ const ah=st.clientHeight-70; scale=Math.max(.5,Math.min(1.3,sw/390,ah/844)); H=844; }
+  device.style.width=(390*scale)+'px'; device.style.height=(H*scale)+'px';
+  vp.style.height=H+'px'; vp.style.transform='scale('+scale+')';
+}
+function makeLayer(code,scroll){
+  const d=S[code], l=document.createElement('div'); l.className='layer'+(showHs?' show-hs':''); l.dataset.code=code;
+  const p=document.createElement('div'); p.className='page';
+  const img=document.createElement('img'); img.src='img/'+code+'.png'; img.alt=d.t; img.width=390; img.height=d.h; img.draggable=false; p.appendChild(img);
+  const list=d.s.map((a,i)=>({a,i,area:a[2]*a[3]})).sort((x,y)=>y.area-x.area);
+  for(const {a} of list){
+    const b=document.createElement('button'); b.type='button'; b.className='hs';
+    b.style.cssText='left:'+a[0]+'px;top:'+a[1]+'px;width:'+a[2]+'px;height:'+a[3]+'px';
+    if(a[6]) { b.hidden=true; continue; }
+    const dest=a[4]; const label=dest===BK?'Back':'Open '+dest+' · '+S[dest].n; b.title=label; b.setAttribute('aria-label',label);
+    b.onclick=(e)=>{e.stopPropagation(); go(dest,a[5]);};
+    p.appendChild(b);
+  }
+  p.addEventListener('click',()=>{ l.classList.remove('flash'); void l.offsetWidth; l.classList.add('flash'); setTimeout(()=>l.classList.remove('flash'),800); });
+  l.appendChild(p); l._h=d.s.find(a=>a[6])||null; l._scroll=scroll||0; return l;
+}
+function anim(el,frames,ms=280){ if(reduce||!el.animate) return Promise.resolve(); return el.animate(frames,{duration:ms,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}).finished.catch(()=>{}); }
+const SLIDE={T:['translateY(100%)','translateY(0)'],L:['translateX(-100%)','translateX(0)'],P:['translateX(100%)','translateX(0)'],B:['translateX(-100%)','translateX(0)']};
+async function show(code,tr,dir,scroll){
+  busy=true; clearTimeout(timer);
+  const old=vp.lastElementChild, nl=makeLayer(code,scroll);
+  if(!old){ vp.appendChild(nl); }
+  else if(dir==='in'){
+    vp.appendChild(nl); nl.scrollTop=0;
+    if(tr==='d') await anim(nl,[{opacity:0},{opacity:1}],220);
+    else{ const f=SLIDE[tr]; const jobs=[anim(nl,[{transform:f[0]},{transform:f[1]}])]; if(tr==='P') jobs.push(anim(old,[{transform:'translateX(0)'},{transform:'translateX(-22%)'}])); if(tr==='B') jobs.push(anim(old,[{transform:'translateX(0)'},{transform:'translateX(22%)'}])); await Promise.all(jobs); }
+  }else{
+    vp.insertBefore(nl,old);
+    if(tr==='d') await anim(old,[{opacity:1},{opacity:0}],200);
+    else{ const f=SLIDE[tr]; const out={T:'translateY(100%)',L:'translateX(-100%)',P:'translateX(100%)',B:'translateX(-100%)'}[tr]; const jobs=[anim(old,[{transform:'translate(0,0)'},{transform:out}])]; if(tr==='P') jobs.push(anim(nl,[{transform:'translateX(-22%)'},{transform:'translateX(0)'}])); if(tr==='B') jobs.push(anim(nl,[{transform:'translateX(22%)'},{transform:'translateX(0)'}])); await Promise.all(jobs); }
+  }
+  for(const l of [...vp.children]) if(l!==nl) l.remove();
+  nl.style.transform=''; nl.scrollTop=scroll||0;
+  if(nl._h){ const h=nl._h; timer=setTimeout(()=>{ if(cur.code===code) go(h[4],h[5]); },h[6]); }
+  busy=false; chrome();
+}
+function chrome(){
+  const d=S[cur.code];
+  cap.innerHTML='<b></b><span></span>'; cap.firstChild.textContent=cur.code; cap.lastChild.textContent=d.t;
+  $('jump').value=cur.code; $('back').disabled=!hist.length&&!PARENT[cur.code]&&cur.code==='A1';
+  document.querySelectorAll('.rail button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.code===cur.code)); document.querySelectorAll('.rail button').forEach(b=>{ if(b.dataset.code===cur.code) b.setAttribute('aria-current','true'); else b.removeAttribute('aria-current'); });
+}
+function go(dest,tr){
+  if(busy) return;
+  if(dest===BK) return back();
+  const l=vp.lastElementChild; hist.push({code:cur.code,tr:cur.tr,scroll:l?l.scrollTop:0});
+  cur={code:dest,tr}; show(dest,tr,'in',0);
+}
+function back(){
+  if(busy) return;
+  if(hist.length){ const p=hist.pop(); const tr=cur.tr; cur={code:p.code,tr:p.tr}; show(p.code,tr,'out',p.scroll); }
+  else if(cur.code!=='A1'){ const p=PARENT[cur.code]||'A1'; const tr=cur.tr; cur={code:p,tr:'d'}; show(p,tr==='d'?'d':tr,'out',0); }
+}
+function jump(code){ if(busy) return; hist=[]; const tr='d'; cur={code,tr}; show(code,tr,'in',0); }
+function restart(){ if(busy) return; hist=[]; cur={code:'A1',tr:'d'}; show('A1','d','in',0); }
+function setHs(v){ showHs=v; try{localStorage.setItem('idocs-hs',v?'1':'0')}catch(e){} $('hsbtn').setAttribute('aria-pressed',String(v)); $('hsbtn').textContent=v?'Hide tap areas':'Show tap areas'; document.querySelectorAll('.layer').forEach(l=>l.classList.toggle('show-hs',v)); }
+
+buildRail();
+$('back').onclick=back; $('restart').onclick=restart; $('hsbtn').onclick=()=>setHs(!showHs);
+addEventListener('keydown',e=>{ if(e.target.tagName==='SELECT') return; if(e.key==='Escape'||e.key==='ArrowLeft'||e.key==='Backspace'){ e.preventDefault(); back(); } else if(e.key==='r'||e.key==='R') restart(); else if(e.key==='h'||e.key==='H') setHs(!showHs); });
+addEventListener('resize',layout);
+layout(); setHs(showHs); show('A1','d','in',0);
+// warm the cache once the first screen is up
+setTimeout(()=>{ for(const c of Object.keys(S)){ const i=new Image(); i.src='img/'+c+'.png'; } },600);
+</script>
+
+</body></html>
